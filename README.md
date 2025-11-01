@@ -2,6 +2,8 @@
 
 A full-stack web application implementing Sudoku with advanced backtracking algorithm for puzzle generation and solving, featuring real-time gameplay and competitive leaderboard.
 
+Feel free to play the game anytime at https://bireshwar67.github.io/Sudoku/
+
 ## 🏗️ Architecture & Design
 
 ### **Frontend (Client-Side)**
