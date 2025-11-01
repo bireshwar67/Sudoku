@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Sudoku Game</h1>
+        
+        <div class="controls">
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+            <button id="newGame">New Game</button>
+            <button id="startTimer">Start Timer</button>
+            <button id="solve">Solve</button>
+            <button id="showLeaderboard">Leaderboard</button>
+        </div>
+
+        <div class="game-info">
+            <div id="timer">Time: 0s</div>
+            <div id="status"></div>
+        </div>
+
+        <div id="sudokuBoard" class="sudoku-board"></div>
+
+        <div id="leaderboardModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>🏆 Leaderboard</h2>
+                <div id="leaderboardList"></div>
+            </div>
+        </div>
+
+        <div id="winModal" class="modal">
+            <div class="modal-content">
+                <h2>🎉 Congratulations!</h2>
+                <p id="winMessage"></p>
+                <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+                <button id="saveScore">Save Score</button>
+                <button id="closeWin">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
