@@ -2,24 +2,17 @@
   "homepage": "https://bireshwar67.github.io/Sudoku",
   "name": "sudoku_game",
   "version": "1.0.0",
-  "description": "Sudoku game with backtracking algorithm and leaderboard",
-  "main": "server.js",
+  "description": "Sudoku game with backtracking algorithm and leaderboard - Vanilla JavaScript",
+  "main": "public/index.html",
   "scripts": {
-    "start": "node server.js",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "build": "react-scripts build",
+    "start": "python3 -m http.server 3000 --directory public",
+    "deploy": "gh-pages -d public",
     "console": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["sudoku", "vanilla-javascript", "backtracking", "puzzle"],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "express": "^5.1.0",
-    "react-scripts": "^5.0.1"
-  },
   "devDependencies": {
     "gh-pages": "^6.3.0"
   }

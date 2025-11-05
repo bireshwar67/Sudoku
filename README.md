@@ -9,16 +9,12 @@ Feel free to play the game anytime at https://bireshwar67.github.io/Sudoku/
 ### **Frontend (Client-Side)**
 - **HTML5**: Semantic structure with modal dialogs
 - **CSS3**: Responsive grid layout with visual 3x3 box separation
-- **Vanilla JavaScript**: Real-time DOM manipulation and API communication
-
-### **Backend (Server-Side)**
-- **Node.js + Express**: RESTful API server
-- **File System**: JSON-based persistent leaderboard storage
-- **Core Algorithm**: Recursive backtracking for puzzle generation/solving
+- **Vanilla JavaScript**: Complete game logic with backtracking algorithm
+- **LocalStorage**: Persistent leaderboard storage
 
 ### **Data Flow**
 ```
-Client Request → Express Router → Sudoku Engine → Response → UI Update
+User Input → Sudoku Engine → DOM Update → LocalStorage
 ```
 
 ## 🧠 Backtracking Algorithm Implementation
@@ -73,12 +69,12 @@ Study Puzzle → Start Timer → Make Moves → Validate Input → Check Complet
 ## 🚀 Installation & Setup
 
 ```bash
-# Clone and install dependencies
-npm install
-
-# Start web server
+# Start simple HTTP server
 npm start
 # → Open http://localhost:3000
+
+# Or open index.html directly in browser
+open public/index.html
 
 # Run console version
 npm run console
@@ -105,28 +101,26 @@ npm run console
 
 ```
 sudoku_game/
-├── server.js           # Express API server
-├── sudoku.js          # Core backtracking algorithm
 ├── game.js            # Console game interface
 ├── index.js           # Console entry point
+├── sudoku.js          # Core backtracking algorithm (console)
 ├── public/
 │   ├── index.html     # Web UI structure
 │   ├── style.css      # Responsive styling
-│   └── script.js      # Frontend game logic
-├── package.json       # Dependencies & scripts
-├── leaderboard.json   # Persistent score storage
+│   └── script.js      # Complete game logic + UI
+├── package.json       # Scripts for serving
 └── README.md          # Documentation
 ```
 
-## 🔧 API Endpoints
+## 🔧 Core Functions
 
-| Method | Endpoint | Purpose |
-|--------|----------|----------|
-| POST | `/api/new-game` | Generate puzzle with backtracking |
-| POST | `/api/make-move` | Validate and apply user move |
-| POST | `/api/solve` | Auto-solve using backtracking |
-| GET | `/api/leaderboard` | Retrieve top 10 scores |
-| POST | `/api/save-score` | Save completion time |
+| Function | Purpose |
+|----------|----------|
+| `generatePuzzle()` | Generate puzzle with backtracking |
+| `isValid()` | Validate move against Sudoku rules |
+| `solve()` | Auto-solve using backtracking |
+| `showLeaderboard()` | Display top 10 scores from localStorage |
+| `saveScore()` | Save completion time to localStorage |
 
 ## 🏆 Features
 
@@ -134,7 +128,7 @@ sudoku_game/
 - ✅ **Real-time Validation**: Instant feedback on move validity
 - ✅ **Visual Design**: Clear 3x3 box separation with responsive grid
 - ✅ **Timer System**: Fair timing with manual start
-- ✅ **Persistent Leaderboard**: JSON-based score tracking
+- ✅ **Persistent Leaderboard**: LocalStorage-based score tracking
 - ✅ **Multiple Interfaces**: Web UI + Console version
 - ✅ **Difficulty Levels**: Configurable puzzle complexity
 - ✅ **Auto-solve**: Demonstrate backtracking algorithm
@@ -144,5 +138,5 @@ sudoku_game/
 - **Algorithm Efficiency**: O(9^(empty_cells)) time complexity with pruning
 - **Memory Management**: Minimal state storage with efficient backtracking
 - **User Experience**: Responsive design with immediate feedback
-- **Data Persistence**: File-based leaderboard with atomic writes
+- **Data Persistence**: Browser localStorage with JSON serialization
 - **Error Handling**: Graceful validation and user guidance

@@ -1,6 +1,88 @@
+class Sudoku {
+    constructor() {
+        this.board = Array(9).fill().map(() => Array(9).fill(0));
+        this.solution = Array(9).fill().map(() => Array(9).fill(0));
+    }
+
+    isValid(board, row, col, num) {
+        for (let x = 0; x < 9; x++) {
+            if (board[row][x] === num) return false;
+        }
+        for (let x = 0; x < 9; x++) {
+            if (board[x][col] === num) return false;
+        }
+        const startRow = row - row % 3;
+        const startCol = col - col % 3;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (board[i + startRow][j + startCol] === num) return false;
+            }
+        }
+        return true;
+    }
+
+    solve(board) {
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                if (board[i][j] === 0) {
+                    for (let num = 1; num <= 9; num++) {
+                        if (this.isValid(board, i, j, num)) {
+                            board[i][j] = num;
+                            if (this.solve(board)) return true;
+                            board[i][j] = 0;
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    generatePuzzle(difficulty = 40) {
+        this.fillBoard();
+        this.solution = this.board.map(row => [...row]);
+        let cellsToRemove = difficulty;
+        while (cellsToRemove > 0) {
+            const row = Math.floor(Math.random() * 9);
+            const col = Math.floor(Math.random() * 9);
+            if (this.board[row][col] !== 0) {
+                this.board[row][col] = 0;
+                cellsToRemove--;
+            }
+        }
+    }
+
+    fillBoard() {
+        const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                if (this.board[i][j] === 0) {
+                    const shuffled = numbers.sort(() => Math.random() - 0.5);
+                    for (const num of shuffled) {
+                        if (this.isValid(this.board, i, j, num)) {
+                            this.board[i][j] = num;
+                            if (this.solve(this.board)) break;
+                            this.board[i][j] = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    isComplete() {
+        return this.board.every(row => row.every(cell => cell !== 0));
+    }
+
+    checkSolution() {
+        return JSON.stringify(this.board) === JSON.stringify(this.solution);
+    }
+}
+
 class SudokuUI {
     constructor() {
-        this.board = null;
+        this.sudoku = null;
         this.startTime = null;
         this.timer = null;
         this.selectedCell = null;
@@ -41,23 +123,14 @@ class SudokuUI {
         }
     }
 
-    async newGame() {
+    newGame() {
         const difficulty = document.getElementById('difficulty').value;
+        const difficultyMap = { easy: 30, medium: 40, hard: 50 };
         
-        try {
-            const response = await fetch('/api/new-game', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ difficulty })
-            });
-            
-            const data = await response.json();
-            this.board = data.board;
-            this.updateBoard();
-            document.getElementById('status').textContent = 'Game ready! Click "Start Timer" to begin timing.';
-        } catch (error) {
-            console.error('Error starting new game:', error);
-        }
+        this.sudoku = new Sudoku();
+        this.sudoku.generatePuzzle(difficultyMap[difficulty] || 40);
+        this.updateBoard();
+        document.getElementById('status').textContent = 'Game ready! Click "Start Timer" to begin timing.';
     }
 
     updateBoard() {
@@ -65,7 +138,7 @@ class SudokuUI {
         cells.forEach((cell, index) => {
             const row = Math.floor(index / 9);
             const col = index % 9;
-            const value = this.board[row][col];
+            const value = this.sudoku.board[row][col];
             
             cell.value = value || '';
             cell.className = 'cell';
@@ -87,7 +160,7 @@ class SudokuUI {
         cell.style.background = '#fff3cd';
     }
 
-    async handleInput(e) {
+    handleInput(e) {
         const cell = e.target;
         const value = parseInt(cell.value);
         
@@ -99,35 +172,24 @@ class SudokuUI {
         const row = parseInt(cell.dataset.row);
         const col = parseInt(cell.dataset.col);
         
-        try {
-            const response = await fetch('/api/make-move', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ row, col, num: value })
-            });
+        if (this.sudoku.isValid(this.sudoku.board, row, col, value)) {
+            this.sudoku.board[row][col] = value;
+            cell.className = 'cell user';
             
-            const data = await response.json();
-            
-            if (data.success) {
-                this.board = data.board;
-                cell.className = 'cell user';
-                
-                if (data.isComplete) {
-                    this.stopTimer();
-                    if (data.isCorrect) {
-                        this.showWinModal(data.time);
-                    } else {
-                        document.getElementById('status').textContent = '❌ Solution incorrect!';
-                    }
+            if (this.sudoku.isComplete()) {
+                this.stopTimer();
+                if (this.sudoku.checkSolution()) {
+                    const time = Math.floor((Date.now() - this.startTime) / 1000);
+                    this.showWinModal(time);
+                } else {
+                    document.getElementById('status').textContent = '❌ Solution incorrect!';
                 }
-            } else {
-                cell.value = '';
-                cell.className = 'cell invalid';
-                setTimeout(() => cell.className = 'cell', 1000);
-                document.getElementById('status').textContent = '❌ Invalid move!';
             }
-        } catch (error) {
-            console.error('Error making move:', error);
+        } else {
+            cell.value = '';
+            cell.className = 'cell invalid';
+            setTimeout(() => cell.className = 'cell', 1000);
+            document.getElementById('status').textContent = '❌ Invalid move!';
         }
     }
 
@@ -142,17 +204,11 @@ class SudokuUI {
         }
     }
 
-    async solve() {
-        try {
-            const response = await fetch('/api/solve', { method: 'POST' });
-            const data = await response.json();
-            this.board = data.board;
-            this.updateBoard();
-            this.stopTimer();
-            document.getElementById('status').textContent = '🤖 Solved using backtracking!';
-        } catch (error) {
-            console.error('Error solving puzzle:', error);
-        }
+    solve() {
+        this.sudoku.solve(this.sudoku.board);
+        this.updateBoard();
+        this.stopTimer();
+        document.getElementById('status').textContent = '🤖 Solved using backtracking!';
     }
 
     startTimer() {
@@ -174,23 +230,19 @@ class SudokuUI {
         }
     }
 
-    async showLeaderboard() {
-        try {
-            const response = await fetch('/api/leaderboard');
-            const leaderboard = await response.json();
-            
-            const listElement = document.getElementById('leaderboardList');
-            listElement.innerHTML = leaderboard.map((entry, index) => 
-                `<div class="leaderboard-entry">
-                    <span>${index + 1}. ${entry.name}</span>
-                    <span>${entry.time}s (${entry.difficulty})</span>
-                </div>`
-            ).join('');
-            
-            document.getElementById('leaderboardModal').style.display = 'block';
-        } catch (error) {
-            console.error('Error loading leaderboard:', error);
-        }
+    showLeaderboard() {
+        const leaderboard = JSON.parse(localStorage.getItem('sudokuLeaderboard') || '[]');
+        const sorted = leaderboard.sort((a, b) => a.time - b.time).slice(0, 10);
+        
+        const listElement = document.getElementById('leaderboardList');
+        listElement.innerHTML = sorted.map((entry, index) => 
+            `<div class="leaderboard-entry">
+                <span>${index + 1}. ${entry.name}</span>
+                <span>${entry.time}s (${entry.difficulty})</span>
+            </div>`
+        ).join('');
+        
+        document.getElementById('leaderboardModal').style.display = 'block';
     }
 
     closeLeaderboard() {
@@ -208,23 +260,17 @@ class SudokuUI {
         document.getElementById('winModal').style.display = 'none';
     }
 
-    async saveScore() {
+    saveScore() {
         const name = document.getElementById('playerName').value || 'Anonymous';
         const time = Math.floor((Date.now() - this.startTime) / 1000);
         const difficulty = document.getElementById('difficulty').value;
         
-        try {
-            await fetch('/api/save-score', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, time, difficulty })
-            });
-            
-            this.closeWinModal();
-            document.getElementById('status').textContent = '✅ Score saved!';
-        } catch (error) {
-            console.error('Error saving score:', error);
-        }
+        const leaderboard = JSON.parse(localStorage.getItem('sudokuLeaderboard') || '[]');
+        leaderboard.push({ name, time, difficulty, date: new Date().toISOString() });
+        localStorage.setItem('sudokuLeaderboard', JSON.stringify(leaderboard));
+        
+        this.closeWinModal();
+        document.getElementById('status').textContent = '✅ Score saved!';
     }
 }
 
